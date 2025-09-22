@@ -2,73 +2,79 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
-import sys # Import sys to allow for a clean exit
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+import sys
 
-# --- 1. Robust Data Loading and Validation ---
+# --- 1. Robust Data Loading and Validation (No changes from before) ---
 try:
     data = pd.read_csv("AAPL.csv")
-
-    # WHY: First, check if the columns you need actually exist.
-    # This prevents a KeyError if 'Date' or 'Close' is missing.
     REQUIRED_COLUMNS = {'Date', 'Close'}
     if not REQUIRED_COLUMNS.issubset(data.columns):
         print(f"Error: CSV file must contain the following columns: {REQUIRED_COLUMNS}")
-        sys.exit() # Stop the script if columns are missing.
-
-    # WHY: Use errors='coerce' to turn any unreadable dates into NaT (Not a Time)
-    # instead of crashing the script.
+        sys.exit()
     data['Date'] = pd.to_datetime(data['Date'], errors='coerce')
-
-    # WHY: Now, dropna will remove rows with missing 'Close' values (NaN) AND
-    # rows with the bad dates we just converted to NaT.
     data = data.dropna(subset=['Date', 'Close'])
-    
-    # WHY: After cleaning, the DataFrame might be empty. If so, we can't proceed.
-    # This check prevents errors in the modeling steps below.
     if data.empty:
         print("Error: No valid data remaining after cleaning. Cannot create a model.")
         sys.exit()
-
     data = data.sort_values('Date')
-
-# WHY: This 'except' block catches the specific error if "AAPL.csv" is not found.
 except FileNotFoundError:
     print("Error: 'AAPL.csv' not found. Please ensure the file is in the correct directory.")
     sys.exit()
-# WHY: This is a general catch-all for any other unexpected pandas/numpy errors.
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
     sys.exit()
 
+print("Data loaded and validated successfully.")
 
-# --- 2. Model Training and Prediction (No changes needed here) ---
-# This part of the code will now only run if the data is successfully loaded and cleaned.
-
-print("Data loaded and validated successfully. Proceeding with model training...")
-
+# --- 2. Prepare Data and Evaluate Model Performance ---
 data['Day'] = range(1, len(data) + 1)
-
 X = data[['Day']]
 y = data['Close']
 
-model = LinearRegression()
-model.fit(X, y)
+# WHY: Split data into training (80%) and testing (20%) sets.
+# random_state ensures the split is the same every time you run the script.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# WHY: Train the model ONLY on the training data.
+eval_model = LinearRegression()
+eval_model.fit(X_train, y_train)
+
+# WHY: Make predictions on the unseen test data.
+predictions = eval_model.predict(X_test)
+
+# WHY: Calculate the error. We use Root Mean Squared Error (RMSE).
+mse = mean_squared_error(y_test, predictions)
+rmse = np.sqrt(mse)
+
+print("\n--- Model Performance Evaluation ---")
+print(f"Root Mean Squared Error (RMSE) on Test Data: ${rmse:.2f}")
+print("This means the model's predictions are, on average, off by this amount.")
+
+
+# --- 3. Train Final Model on ALL Data and Predict Future ---
+# WHY: For the best possible forecast, we retrain the model on the entire dataset
+# now that we know its approximate performance.
+final_model = LinearRegression()
+final_model.fit(X, y) # Fit on all data: X, y
 
 future_days = np.arange(len(data)+1, len(data)+6).reshape(-1,1)
-preds = model.predict(future_days)
+future_preds = final_model.predict(future_days)
+
+print("\n--- Future Predictions ---")
+print("Predictions for next 5 days:", future_preds)
 
 
-# --- 3. Output and Visualization (No changes needed here) ---
-
-print("\nPredictions for next 5 days:", preds)
-
-plt.figure(figsize=(10, 6)) # Make the plot a bit bigger
-plt.scatter(data['Day'], y, color="blue", label="Historical Data")
-plt.plot(future_days[:,0], preds, color="red", marker='o', linestyle='--', label="Forecast")
-plt.title("AAPL Stock Price Forecast")
+# --- 4. Visualization ---
+plt.figure(figsize=(12, 7))
+# Plot historical data
+plt.scatter(X_test, y_test, color='blue', label='Actual Test Data', alpha=0.6)
+# Plot the model's predictions on the test set
+plt.scatter(X_test, predictions, color='orange', label='Model Predictions on Test Data', alpha=0.7)
+plt.title("AAPL Stock Price: Model Performance Evaluation")
 plt.xlabel("Day Sequence")
 plt.ylabel("Close Price (USD)")
 plt.legend()
 plt.grid(True)
-
 plt.show()
