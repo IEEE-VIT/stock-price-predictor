@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import sys
 
-# --- 1. Robust Data Loading and Validation (No changes from before) ---
+# --- 1. Robust Data Loading and Validation ---
 try:
     data = pd.read_csv("AAPL.csv")
     REQUIRED_COLUMNS = {'Date', 'Close'}
@@ -28,23 +28,23 @@ except Exception as e:
 
 print("Data loaded and validated successfully.")
 
+
 # --- 2. Prepare Data and Evaluate Model Performance ---
 data['Day'] = range(1, len(data) + 1)
 X = data[['Day']]
 y = data['Close']
 
-# WHY: Split data into training (80%) and testing (20%) sets.
-# random_state ensures the split is the same every time you run the script.
+# Split data into training (80%) and testing (20%) sets.
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# WHY: Train the model ONLY on the training data.
+# Train the model ONLY on the training data for evaluation.
 eval_model = LinearRegression()
 eval_model.fit(X_train, y_train)
 
-# WHY: Make predictions on the unseen test data.
+# Make predictions on the unseen test data.
 predictions = eval_model.predict(X_test)
 
-# WHY: Calculate the error. We use Root Mean Squared Error (RMSE).
+# Calculate the Root Mean Squared Error (RMSE).
 mse = mean_squared_error(y_test, predictions)
 rmse = np.sqrt(mse)
 
@@ -54,8 +54,7 @@ print("This means the model's predictions are, on average, off by this amount.")
 
 
 # --- 3. Train Final Model on ALL Data and Predict Future ---
-# WHY: For the best possible forecast, we retrain the model on the entire dataset
-# now that we know its approximate performance.
+# For the best possible forecast, we retrain the model on the entire dataset.
 final_model = LinearRegression()
 final_model.fit(X, y) # Fit on all data: X, y
 
