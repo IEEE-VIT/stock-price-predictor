@@ -12,7 +12,7 @@ data = data.sort_values('Date')
 
 data['Day'] = range(1, len(data) + 1) 
 
-X = data[['Day']]
+X = data['Day']
 y = data['Close']
 
 model = LinearRegression()
@@ -24,5 +24,5 @@ preds = model.predict(future_days)
 print("Predictions for next 5 days:", preds)
 
 plt.scatter(X, y, color="blue")
-plt.plot(future_days["day"], preds, color="red")
+plt.plot(future_days, preds, color="red")
 plt.show()
