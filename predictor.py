@@ -70,4 +70,5 @@ plt.xlabel("Day Sequence")
 plt.ylabel("Close Price (USD)")
 plt.legend()
 plt.grid(True)
+
 plt.show()
