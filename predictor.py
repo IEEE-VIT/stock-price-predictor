@@ -27,6 +27,13 @@ PREDICT_N_DAYS = 5          # forecast horizon
 # Load & prepare data
 # -----------------------
 df = pd.read_csv(CSV_PATH)
+required_columns = [DATE_COL, TARGET_COL]
+missing_columns = [col for col in required_columns if col not in df.columns]
+if missing_columns:
+    raise ValueError(
+        "CSV is missing required columns: "
+        f"{missing_columns}. Found columns: {list(df.columns)}"
+    )
 df[DATE_COL] = pd.to_datetime(df[DATE_COL])
 df = df.sort_values(DATE_COL).reset_index(drop=True)
 
