@@ -1,9 +1,11 @@
 # predictor.py
 """
 Time-series stock predictor with proper train/test split and evaluation.
-Reads AAPL.csv with at least columns: Date, Close
+Reads a CSV with at least columns: Date, Close
 Creates lag features (past n days' Close) to predict next-day Close.
 """
+
+import argparse
 
 import pandas as pd
 import numpy as np
@@ -15,13 +17,45 @@ import matplotlib.pyplot as plt
 # -----------------------
 # Config
 # -----------------------
-CSV_PATH = "AAPL.csv"       # input CSV file path
+DEFAULT_CSV_PATH = "AAPL.csv"  # input CSV file path
 DATE_COL = "Date"
 TARGET_COL = "Close"
-LAGS = 5                    # use past LAGS days as features
-TRAIN_RATIO = 0.8           # time-based train/test split
-RANDOM_SEED = 42            # not used for linear regression but good practice
-PREDICT_N_DAYS = 5          # forecast horizon
+LAGS = 5                       # use past LAGS days as features
+TRAIN_RATIO = 0.8              # time-based train/test split
+RANDOM_SEED = 42               # not used for linear regression but good practice
+DEFAULT_PREDICT_N_DAYS = 5     # forecast horizon
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description=(
+            "Time-series stock predictor with lag features "
+            "and a time-based train/test split."
+        ),
+    )
+    parser.add_argument(
+        "--csv",
+        default=DEFAULT_CSV_PATH,
+        help=f"Path to the input dataset (default: {DEFAULT_CSV_PATH}).",
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=DEFAULT_PREDICT_N_DAYS,
+        help=(
+            "Number of days/periods to predict "
+            f"(default: {DEFAULT_PREDICT_N_DAYS})."
+        ),
+    )
+    args = parser.parse_args()
+    if args.days < 1:
+        parser.error("--days must be at least 1")
+    return args
+
+
+args = parse_args()
+CSV_PATH = args.csv
+PREDICT_N_DAYS = args.days
 
 # -----------------------
 # Load & prepare data

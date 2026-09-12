@@ -38,3 +38,14 @@ You can find the dataset here: [Apple Stock Data on Kaggle](https://www.kaggle.c
    ```bash
    python predictor.py
    ```
+
+   Optional flags (defaults match the previous hardcoded values):
+
+   ```bash
+   python predictor.py --csv AAPL.csv --days 5
+   ```
+
+   | Flag | Description | Default |
+   | --- | --- | --- |
+   | `--csv` | Path to the input dataset | `AAPL.csv` |
+   | `--days` | Number of days/periods to predict | `5` |
