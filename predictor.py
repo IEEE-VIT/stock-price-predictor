@@ -11,6 +11,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--save-plot", help="Save the plot to a file")
+args = parser.parse_args()
 
 # -----------------------
 # Config
@@ -119,4 +123,8 @@ plt.ylabel("Close Price")
 plt.title("AAPL - Time-series prediction (lag features, time-based split)")
 plt.legend()
 plt.tight_layout()
-plt.show()
+if args.save_plot:
+    plt.savefig(args.save_plot)
+    plt.close()
+else:
+    plt.show()
