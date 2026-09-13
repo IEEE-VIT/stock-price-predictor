@@ -38,3 +38,14 @@ You can find the dataset here: [Apple Stock Data on Kaggle](https://www.kaggle.c
    ```bash
    python predictor.py
    ```
+
+Optional flags:
+
+```bash
+python predictor.py --csv AAPL.csv --days 5
+python predictor.py --save-plot forecast.png
+```
+
+- `--csv`: Path to the input dataset (default: `AAPL.csv`).
+- `--days`: Number of future days to forecast (default: `5`).
+- `--save-plot`: Write the plot to a file instead of calling `plt.show()`. Useful in headless or CI environments.
