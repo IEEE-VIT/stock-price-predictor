@@ -38,3 +38,7 @@ You can find the dataset here: [Apple Stock Data on Kaggle](https://www.kaggle.c
    ```bash
    python predictor.py
    ```
+3. Save test-set evaluation metrics to `metrics.json`:
+   ```bash
+   python predictor.py --save-metrics
+   ```
